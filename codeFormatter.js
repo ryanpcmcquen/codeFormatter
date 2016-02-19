@@ -1,4 +1,4 @@
-/* codeFormatter v0.1.0 by ryanpcmcquen */
+/*! codeFormatter v0.1.0 by ryanpcmcquen */
 
 /*global window, PR*/
 /*jslint browser:true, white:true*/
