@@ -8,9 +8,8 @@
   'use strict';
   var gcp = document.createElement('script');
   gcp.type = 'text/javascript';
-  gcp.async = true;
-  gcp.src = 'https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?lang=css&lang=dart&lang=erlang&lang=go&lang=hs&lang=lua&lang=r&lang=rust&lang=sql&lang=wiki';
-  var s = document.getElementsByTagName('script')[0];
+  gcp.src = 'https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autoload=false&lang=css&lang=dart&lang=erlang&lang=go&lang=hs&lang=lua&lang=r&lang=rust&lang=sql&lang=wiki';
+  var s = document.getElementsByTagName('head')[0];
   s.parentNode.insertBefore(gcp, s);
 }());
 
