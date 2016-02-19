@@ -34,7 +34,7 @@
             // match the code language, so we can
             // support a lot of awesome syntax highlighting
             // this needs a little extra filtering, but cascading is cool
-            var codeLanguage = String(i.textContent.match(codeLanguageRegex)).slice(3).split(' ')[0].trim();
+            var codeLanguage = String(i.textContent.match(codeLanguageRegex)).slice(3).split(/(\s+)/)[0].trim();
             if (i.textContent.match(tripleTickRegex)) {
               i.innerHTML = i.innerHTML.replace(tripleTickRegex, replacement("$&", codeLanguage));
             }
