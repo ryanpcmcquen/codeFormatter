@@ -1,4 +1,4 @@
-/*! codeFormatter v0.1.1 by ryanpcmcquen */
+/*! codeFormatter v0.1.2 by ryanpcmcquen */
 //
 // Ryan P.C. McQuen | Everett, WA | ryanpcmcquen@member.fsf.org
 //
@@ -19,47 +19,48 @@
 // You may have received a copy of the GNU General Public License along
 // with this program (most likely, a file named COPYING).  If not, see
 // <https://www.gnu.org/licenses/>.
-
 /*global window*/
-/*jslint browser:true, white:true*/
-
+/*jslint browser:true*/
 (function () {
 
-  'use strict';
+    "use strict";
 
-  var codeFormatter = function (selector) {
-    var replacement = function (matchedText, language) {
-      language = language || 'js';
-      return ("<code class='prettyprint lang-" + (language) + "'>" + String(matchedText) + "</code>");
-    };
-    var contentArray = Array.prototype.slice.call(document.querySelectorAll(selector));
-    // multi-line code
-    var tripleTickRegex = new RegExp(/^```{1}[\w\W]*?^```$/gim);
-    // inline code
-    var singleTickRegex = new RegExp(/`[^`]+`/g);
-    var codeLanguageRegex = new RegExp(/```{1}.*/);
-    contentArray.map(function (i) {
-      if (i.hasAttribute('contenteditable')) {
-        if (!i.innerHTML.match(/<code/gi)) {
-          // single tick regex only works if it is outside the triple tick match
-          if (i.textContent.match(singleTickRegex)) {
-            i.innerHTML = i.innerHTML.replace(singleTickRegex, replacement("$&"));
-          }
-          // match the code language, so we can
-          // support a lot of awesome syntax highlighting
-          if ((i.textContent.match(codeLanguageRegex) !== null) && (i.textContent !== undefined)) {
-            // this needs a little extra filtering, but cascading is cool
-            var codeLanguage = String(i.textContent.match(codeLanguageRegex)).slice(3).split(/(\s+)/)[0].trim();
-            if (i.textContent.match(tripleTickRegex)) {
-              i.innerHTML = i.innerHTML.replace(tripleTickRegex, replacement("$&", codeLanguage));
+    var codeFormatter = function (selector) {
+        var replacement = function (matchedText, language) {
+            language = language || "js";
+            return ("<code class='prettyprint lang-" + (language) + "'>" + String(matchedText) + "</code>");
+        };
+        var contentArray = Array.prototype.slice.call(document.querySelectorAll(selector));
+        // Multi-line code:
+        var tripleTickRegex = new RegExp(/^```{1}[\w\W]*?^```$/gim);
+        // Inline code:
+        var singleTickRegex = new RegExp(/`[^`]+`/g);
+        var codeLanguageRegex = new RegExp(/```{1}.*/);
+        contentArray.map(function (i) {
+            if (i.hasAttribute("contenteditable")) {
+                if (!i.innerHTML.match(/<code/gi)) {
+                    // Match the code language, so we can support
+                    // a lot of awesome syntax highlighting.
+                    if ((i.textContent.match(codeLanguageRegex) !== null) && (i.textContent !== undefined)) {
+                        // This needs a little extra filtering, but cascading is cool.
+                        var codeLanguage = String(i.textContent.match(codeLanguageRegex)).slice(3).split(/(\s+)/)[0].trim();
+                        console.log('codeLanguage:', codeLanguage);
+                        console.log(i.textContent.match(tripleTickRegex));
+                        if (i.textContent.match(tripleTickRegex)) {
+                            i.innerHTML = i.innerHTML.replace(tripleTickRegex, replacement("$&", codeLanguage));
+                        }
+                    }
+                    // Single tick regex only works if it is outside the triple tick match:
+                    console.log(i.textContent.match(singleTickRegex));
+                    if (i.textContent.match(singleTickRegex)) {
+                        i.innerHTML = i.innerHTML.replace(singleTickRegex, replacement("$&"));
+                    }
+                }
             }
-          }
-        }
-      }
-    });
-  };
+        });
+    };
 
-  // attach globally
-  window.codeFormatter = codeFormatter;
+    // Attach globally:
+    window.codeFormatter = codeFormatter;
 
 }());
