@@ -44,14 +44,11 @@
                     if ((i.textContent.match(codeLanguageRegex) !== null) && (i.textContent !== undefined)) {
                         // This needs a little extra filtering, but cascading is cool.
                         var codeLanguage = String(i.textContent.match(codeLanguageRegex)).slice(3).split(/(\s+)/)[0].trim();
-                        console.log('codeLanguage:', codeLanguage);
-                        console.log(i.textContent.match(tripleTickRegex));
                         if (i.textContent.match(tripleTickRegex)) {
                             i.innerHTML = i.innerHTML.replace(tripleTickRegex, replacement("$&", codeLanguage));
                         }
                     }
                     // Single tick regex only works if it is outside the triple tick match:
-                    console.log(i.textContent.match(singleTickRegex));
                     if (i.textContent.match(singleTickRegex)) {
                         i.innerHTML = i.innerHTML.replace(singleTickRegex, replacement("$&"));
                     }
