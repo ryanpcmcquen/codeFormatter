@@ -38,18 +38,18 @@
         var codeLanguageRegex = new RegExp(/```{1}.*/);
         contentArray.map(function (i) {
             if (i.hasAttribute("contenteditable")) {
-                if (!i.innerHTML.match(/<code/gi)) {
+                if (!(/<code/gi).test(i.innerHTML)) {
                     // Match the code language, so we can support
                     // a lot of awesome syntax highlighting.
-                    if ((i.textContent.match(codeLanguageRegex) !== null) && (i.textContent !== undefined)) {
+                    if (i.textContent && (codeLanguageRegex).test(i.textContent)) {
                         // This needs a little extra filtering, but cascading is cool.
                         var codeLanguage = String(i.textContent.match(codeLanguageRegex)).slice(3).split(/(\s+)/)[0].trim();
-                        if (i.textContent.match(tripleTickRegex)) {
+                        if ((tripleTickRegex).test(i.textContent)) {
                             i.innerHTML = i.innerHTML.replace(tripleTickRegex, replacement("$&", codeLanguage));
                         }
                     }
                     // Single tick regex only works if it is outside the triple tick match:
-                    if (i.textContent.match(singleTickRegex)) {
+                    if ((singleTickRegex).test(i.textContent)) {
                         i.innerHTML = i.innerHTML.replace(singleTickRegex, replacement("$&"));
                     }
                 }
