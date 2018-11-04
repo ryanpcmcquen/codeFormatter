@@ -1,4 +1,4 @@
-/*! codeFormatter v0.1.2 by ryanpcmcquen */
+/*! codeFormatter v1.0.0 by ryanpcmcquen */
 //
 // Ryan P. C. McQuen | Everett, WA | ryanpcmcquen@member.fsf.org
 //
@@ -27,8 +27,9 @@
 
     var codeFormatter = function (selector) {
         var replacement = function (matchedText, language) {
-            language = language || "js";
-            return ("<code class='prettyprint lang-" + (language) + "'>" + String(matchedText) + "</code>");
+            return (
+                "<code" + (language ? " class='prettyprint lang-" + (language) + "'>" : ">") + String(matchedText) + "</code>"
+            );
         };
         var contentArray = Array.prototype.slice.call(document.querySelectorAll(selector));
         // Multi-line code:
