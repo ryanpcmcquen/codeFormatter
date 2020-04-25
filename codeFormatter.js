@@ -1,4 +1,4 @@
-/*! codeFormatter v1.0.1 by ryanpcmcquen */
+/*! codeFormatter v2.0.0 by ryanpcmcquen */
 //
 // Ryan P. C. McQuen | Everett, WA
 
