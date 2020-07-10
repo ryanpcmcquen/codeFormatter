@@ -2,8 +2,8 @@
 //
 // Ryan McQuen
 
-/* global window */
-/* jslint browser:true */
+/*jslint browser*/
+
 (function () {
     "use strict";
 
