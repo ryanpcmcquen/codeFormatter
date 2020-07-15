@@ -8,7 +8,7 @@
     "use strict";
 
     var replacement = function (matchedText, language) {
-        var codeBlock = document.createElement("code");
+        var codeBlock = document.createElement("pre");
         var textNode = document.createTextNode(String(matchedText));
         if (language) {
             codeBlock.classList.add("prettyprint", "lang-" + language);
@@ -19,9 +19,12 @@
     };
 
     var cleanReplace = function (i, regex, language) {
-        return i.parentNode.replaceChild(
-            replacement(i.textContent.match(regex), language),
-            i
+        var codeMatch = i.textContent.match(regex);
+        while (i.firstChild) {
+            i.removeChild(i.firstChild);
+        }
+        return i.appendChild(
+            replacement(codeMatch, language)
         );
     };
 
@@ -47,17 +50,16 @@
                     ).slice(3).split(/(\s+)/)[0].trim();
 
                     if (tripleTickRegex.test(i.textContent)) {
-                        i.innerHTML = cleanReplace(
+                        cleanReplace(
                             i,
                             tripleTickRegex,
                             codeLanguage
                         );
                     }
-                }
-                // Single tick regex only works if it is
-                // outside the triple tick match:
-                if (singleTickRegex.test(i.textContent)) {
-                    i.innerHTML = cleanReplace(i, singleTickRegex);
+                } else if (singleTickRegex.test(i.textContent)) {
+                    // Single tick regex only works if it is
+                    // outside the triple tick match:
+                    cleanReplace(i, singleTickRegex);
                 }
             }
         });
