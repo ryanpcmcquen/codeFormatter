@@ -1,4 +1,4 @@
-/*! codeFormatter v4.0.1 by ryanpcmcquen */
+/*! codeFormatter v4.0.2 by ryanpcmcquen */
 //
 // Ryan McQuen
 
@@ -11,7 +11,7 @@
         var codeBlock = document.createElement("pre");
         var textNode = document.createTextNode(String(matchedText));
         if (language) {
-            codeBlock.classList.add("prettyprint", "lang-" + language);
+            codeBlock.classList.add("microlight", "prettyprint", "lang-" + language);
         }
         codeBlock.appendChild(textNode);
 
