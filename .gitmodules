@@ -1,3 +1,0 @@
-[submodule "assets/code-prettify"]
-	path = assets/code-prettify
-	url = git@github.com:google/code-prettify.git
