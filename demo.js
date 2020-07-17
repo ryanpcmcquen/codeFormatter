@@ -1,7 +1,12 @@
 document.addEventListener(
     'DOMContentLoaded',
     function () {
-        codeFormatter('.content');
-        microlight.reset();
+        document.querySelector('button').addEventListener(
+            'click',
+            function () {
+                codeFormatter('.content');
+                microlight.reset();
+            }
+        );
     }
 );
