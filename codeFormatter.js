@@ -9,6 +9,9 @@
 
     var replacement = function (matchedText, language) {
         var codeBlock = document.createElement('pre');
+        console.log(matchedText);
+        console.log(matchedText.groups);
+        console.log(Array.prototype.slice.call(matchedText));
         var textNode = document.createTextNode(String(matchedText));
         if (language !== 'plain' && language !== 'p') {
             codeBlock.classList.add('microlight');
@@ -18,11 +21,14 @@
         return codeBlock;
     };
 
-    var cleanReplace = function (i, regex, language) {
+
+    var cleanReplace = function (i,  regex, language) {
         Array.prototype.slice.call(i.childNodes).forEach(function (child) {
             if (regex.test(child.textContent)) {
+                console.log(child.textContent);
                 i.replaceChild(
-                    replacement(child.textContent.match(regex), language),
+                    replacement(child.textContent.matchAll(regex), language),
+                    // replacement(regex.exec(child.textContent), language),
                     child
                 );
             }
@@ -35,16 +41,20 @@
         );
 
         // Multi-line code:
-        var tripleTickRegex = new RegExp(
-            /([\w\W]*)(```{1}[\w\W]*?```)([\w\W]*)/gim
-        );
+        // var tripleTickRegex = new RegExp(
+        //     /([\w\W]*)(```{1}[\w\W]*?```)([\w\W]*)/gim
+        // );
+        // var tripleTickRegex = new RegExp('(```{1}[\w\W]*?```)([\w\W]*)','gim');
+        // var tripleTickRegex = new RegExp('(```{1}[\w\W]*?```)([\w\W]*)','gim');
+var tripleTickRegex = new RegExp('([^(```)]*)(```{1}[\w\W]*?```)([\w\W]*)','gim');
         // Inline code:
         var singleTickRegex = new RegExp(/`[^`]+`/g);
         var codeLanguageRegex = new RegExp(/```{1}.*/);
         contentArray.map(function (i) {
-            if (!/<code/gi.test(i.innerHTML)) {
+            if (!/<pre/gi.test(i.innerHTML)) {
                 // Match the code language, so we can support
                 // a lot of awesome syntax highlighting.
+                console.log(tripleTickRegex.test(i.textContent));
                 if (i.textContent && tripleTickRegex.test(i.textContent)) {
                     // This needs a little extra filtering,
                     // but cascading is cool.
