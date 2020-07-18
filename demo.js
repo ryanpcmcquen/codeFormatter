@@ -5,7 +5,6 @@ document.addEventListener(
             'click',
             function () {
                 codeFormatter('.content');
-                microlight.reset();
             }
         );
     }
