@@ -1,38 +1,37 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <title>codeFormatter demo</title>
+    </head>
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
-    <title>codeFormatter demo</title>
-</head>
-
-<body>
-    <div class="content" contenteditable="true">
-        <span>
+    <body>
+        <div class="content" contenteditable="true">
+            <span>
 Just a block of awesome text.
 ```
-            int foo[10] = { 0 };
-            // Comments are great.
-            for (int index = 0; index < (sizeof(foo) / sizeof(foo)[0]); index++) {
-                foo[index] = index;
-            }
+    int foo[10] = { 0 };
+    // Comments are great.
+    for (int index = 0; index < (sizeof(foo) / sizeof(foo)[0]); index++) {
+        foo[index] = index;
+    }
 ```
-And more awesome text goes here.
-Inline `code` is supported, and you can disable highlighting too:
+
+And more awesome text goes here. You can disable highlighting too:
 
 ```plain
-            int foo[10] = { 0 };
-            // Comments are great.
-            for (int index = 0; index < (sizeof(foo) / sizeof(foo)[0]); index++) {
-                foo[index] = index;
-            }
+int foo[10] = { 0 };
+// Comments are great.
+for (int index = 0; index < (sizeof(foo) / sizeof(foo)[0]); index++) {
+    foo[index] = index;
+}
 ```
-        </span>
-    </div>
-    <button>Format this thing!</button>
-    <script src="codeFormatter.js"></script>
-    <script src="demo.js"></script>
-</body>
-
+Inline `code` is also supported.
+            </span>
+        </div>
+        <button>Format this thing!</button>
+        <script src="codeFormatter.js"></script>
+        <script src="demo.js"></script>
+    </body>
 </html>

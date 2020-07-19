@@ -110,7 +110,7 @@
                         // 7: xml comment
                         text[pos - 4] + prev2 + prev1 == '-->',
                         // 8: multiline comment
-                        prev2 + prev1 == '*/'
+                        prev2 + prev1 == '*/',
                     ][tokenType]
                 ) {
                     // appending the token to the result
@@ -174,7 +174,7 @@
                                     _3px_0px_5 +
                                     pxColor +
                                     alpha / 4 +
-                                    brace
+                                    brace,
                             ][
                                 // not formatted
                                 !tokenType
@@ -234,7 +234,7 @@
                                 '<!--',
                             chr + next1 == '/*', //  8: multiline comment
                             chr + next1 == '//', //  9: single-line comment
-                            chr == '#' // 10: hash-style comment
+                            chr == '#', // 10: hash-style comment
                         ][--tokenType]
                     );
                 }
@@ -265,11 +265,6 @@
 
     var replacement = function (matchedText, blockType, language) {
         var codeBlock = document.createElement(blockType);
-
-        // if (blockType === 'pre') {
-        //     matchedText;
-        // } else {
-        // }
         var textNode = document.createTextNode(String(matchedText));
 
         if (language !== 'plain' && language !== 'p') {
@@ -280,60 +275,51 @@
         return codeBlock;
     };
 
-    var cleanReplace = function (i, regex, blockType, language) {
-        Array.prototype.slice.call(i.childNodes).forEach(function (child) {
-            if (regex.test(child.textContent)) {
-                i.replaceChild(
-                    replacement(
-                        child.textContent.match(regex),
-                        blockType,
-                        language
-                    ),
-                    child
-                );
-            }
-        });
-    };
-
     var codeFormatter = function (selector) {
         var contentArray = Array.prototype.slice.call(
             document.querySelectorAll(selector)
         );
 
         // Multi-line code:
-        // var tripleTickRegex = new RegExp('([^(```)]*)(```{1}[\w\W]*?```)([\w\W]*)','gim');
         var tripleTickRegex = /```[\w\W]+```/gim;
         // Inline code:
-        // var singleTickRegex = new RegExp(/`[^`]+`/g);
         var singleTickRegex = /`[^`]+`/g;
-        // var codeLanguageRegex = new RegExp(/```{1}.*/);
+
         var codeLanguageRegex = /```{1}.*/;
 
-        contentArray.forEach(function (i) {
-            if (!/<pre/gi.test(i.innerHTML) && !/<code/gi.test(i.innerHTML)) {
+        contentArray.forEach(function (content) {
+            if (
+                !/<pre/gi.test(content.innerHTML) &&
+                !/<code/gi.test(content.innerHTML)
+            ) {
                 // Match the code language, so we can support
                 // a lot of awesome syntax highlighting.
-                if (i.textContent && tripleTickRegex.test(i.textContent)) {
+                if (
+                    content.textContent &&
+                    tripleTickRegex.test(content.textContent)
+                ) {
                     // This needs a little extra filtering,
                     // but cascading is cool.
                     var codeLanguage = String(
-                        i.textContent.match(codeLanguageRegex)
+                        content.textContent.match(codeLanguageRegex)
                     )
                         .slice(3)
                         .split(/(\s+)/)[0]
                         .trim();
 
-                    cleanReplace(i, tripleTickRegex, 'pre', codeLanguage);
-                    var theNewKidsOnTheBlock = i.textContent
+                    var theNewKidsOnTheBlock = content.textContent
                         .split(/(```)/)
                         .map(function (textBlock, index, self) {
                             if (/```/.test(textBlock)) {
                                 var backticks = document.createElement('span');
-                                backticks.style.opacity = 0.5;
+                                var breakNode = document.createElement('br');
+                                backticks.style.opacity = 0.2;
                                 var textNode = document.createTextNode(
                                     textBlock
                                 );
+
                                 backticks.appendChild(textNode);
+                                backticks.appendChild(breakNode);
 
                                 return backticks;
                             } else if (
@@ -345,6 +331,54 @@
                                     'pre',
                                     textBlock.slice(0, 1) === 'p' ? 'plain' : ''
                                 );
+                            } else if (
+                                singleTickRegex.test(content.textContent)
+                            ) {
+                                // Single tick regex only works if it is
+                                // outside the triple tick match:
+                                var theSingleKids = textBlock
+                                    .split(/(`)/)
+                                    .map(function (splitNode, index, self) {
+                                        if (/`/.test(splitNode)) {
+                                            var backticks = document.createElement(
+                                                'span'
+                                            );
+
+                                            backticks.style.opacity = 0.2;
+                                            var textNode = document.createTextNode(
+                                                splitNode
+                                            );
+
+                                            backticks.appendChild(textNode);
+
+                                            return backticks;
+                                        } else if (
+                                            self[index - 1] === '`' &&
+                                            self[index + 1] === '`'
+                                        ) {
+                                            return replacement(
+                                                splitNode,
+                                                'code'
+                                            );
+                                        } else {
+                                            var theOtherStuff = document.createElement(
+                                                'span'
+                                            );
+
+                                            var textNode = document.createTextNode(
+                                                splitNode
+                                            );
+                                            theOtherStuff.appendChild(textNode);
+
+                                            return theOtherStuff;
+                                        }
+                                    });
+
+                                var inlineSpan = document.createElement('span');
+                                theSingleKids.forEach(function (singleKid) {
+                                    inlineSpan.appendChild(singleKid);
+                                });
+                                return inlineSpan;
                             } else {
                                 var theOtherStuff = document.createElement(
                                     'span'
@@ -353,17 +387,21 @@
                                 var textNode = document.createTextNode(
                                     textBlock
                                 );
+
                                 theOtherStuff.appendChild(textNode);
 
                                 return theOtherStuff;
                             }
                         });
-                    console.log(theNewKidsOnTheBlock);
-                }
-                if (singleTickRegex.test(i.textContent)) {
-                    // Single tick regex only works if it is
-                    // outside the triple tick match:
-                    cleanReplace(i, singleTickRegex, 'code');
+                    while (content.firstChild) {
+                        content.removeChild(content.firstChild);
+                    }
+                    theNewKidsOnTheBlock.forEach(function (newKid) {
+                        if (/```/.test(newKid.textContent)) {
+                            content.appendChild(document.createElement('br'));
+                        }
+                        content.appendChild(newKid);
+                    });
                 }
             }
         });

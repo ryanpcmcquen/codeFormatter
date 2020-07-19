@@ -1,11 +1,5 @@
-document.addEventListener(
-    'DOMContentLoaded',
-    function () {
-        document.querySelector('button').addEventListener(
-            'click',
-            function () {
-                codeFormatter('.content');
-            }
-        );
-    }
-);
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelector('button').addEventListener('click', function () {
+        codeFormatter('.content[contenteditable]');
+    });
+});
