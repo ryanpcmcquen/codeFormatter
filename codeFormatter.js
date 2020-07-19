@@ -1,86 +1,6 @@
-/*! codeFormatter v5.0.0 by ryanpcmcquen */
+/*! codeFormatter v6.0.0 by ryanpcmcquen */
 //
 // Ryan McQuen
-
-/*jslint browser*/
-
-(function () {
-    'use strict';
-
-    var replacement = function (matchedText, language) {
-        var codeBlock = document.createElement('pre');
-        console.log(matchedText);
-        console.log(matchedText.groups);
-        console.log(Array.prototype.slice.call(matchedText));
-        var textNode = document.createTextNode(String(matchedText));
-        if (language !== 'plain' && language !== 'p') {
-            codeBlock.classList.add('microlight');
-        }
-        codeBlock.appendChild(textNode);
-
-        return codeBlock;
-    };
-
-
-    var cleanReplace = function (i,  regex, language) {
-        Array.prototype.slice.call(i.childNodes).forEach(function (child) {
-            if (regex.test(child.textContent)) {
-                console.log(child.textContent);
-                i.replaceChild(
-                    replacement(child.textContent.matchAll(regex), language),
-                    // replacement(regex.exec(child.textContent), language),
-                    child
-                );
-            }
-        });
-    };
-
-    var codeFormatter = function (selector) {
-        var contentArray = Array.prototype.slice.call(
-            document.querySelectorAll(selector)
-        );
-
-        // Multi-line code:
-        // var tripleTickRegex = new RegExp(
-        //     /([\w\W]*)(```{1}[\w\W]*?```)([\w\W]*)/gim
-        // );
-        // var tripleTickRegex = new RegExp('(```{1}[\w\W]*?```)([\w\W]*)','gim');
-        // var tripleTickRegex = new RegExp('(```{1}[\w\W]*?```)([\w\W]*)','gim');
-var tripleTickRegex = new RegExp('([^(```)]*)(```{1}[\w\W]*?```)([\w\W]*)','gim');
-        // Inline code:
-        var singleTickRegex = new RegExp(/`[^`]+`/g);
-        var codeLanguageRegex = new RegExp(/```{1}.*/);
-        contentArray.map(function (i) {
-            if (!/<pre/gi.test(i.innerHTML)) {
-                // Match the code language, so we can support
-                // a lot of awesome syntax highlighting.
-                console.log(tripleTickRegex.test(i.textContent));
-                if (i.textContent && tripleTickRegex.test(i.textContent)) {
-                    // This needs a little extra filtering,
-                    // but cascading is cool.
-                    var codeLanguage = String(
-                        i.textContent.match(codeLanguageRegex)
-                    )
-                        .slice(3)
-                        .split(/(\s+)/)[0]
-                        .trim();
-
-                    cleanReplace(i, tripleTickRegex, codeLanguage);
-                } else if (singleTickRegex.test(i.textContent)) {
-                    // Single tick regex only works if it is
-                    // outside the triple tick match:
-                    cleanReplace(i, singleTickRegex);
-                }
-            }
-        });
-
-        // Invoke microlight:
-        microlight.reset();
-    };
-
-    // Attach globally:
-    window.codeFormatter = codeFormatter;
-})();
 
 /**
  * @fileoverview microlight - syntax highlightning library
@@ -338,3 +258,120 @@ var tripleTickRegex = new RegExp('([^(```)]*)(```{1}[\w\W]*?```)([\w\W]*)','gim'
         );
     }
 });
+
+/*jslint browser*/
+(function () {
+    'use strict';
+
+    var replacement = function (matchedText, blockType, language) {
+        var codeBlock = document.createElement(blockType);
+
+        // if (blockType === 'pre') {
+        //     matchedText;
+        // } else {
+        // }
+        var textNode = document.createTextNode(String(matchedText));
+
+        if (language !== 'plain' && language !== 'p') {
+            codeBlock.classList.add('microlight');
+        }
+        codeBlock.appendChild(textNode);
+
+        return codeBlock;
+    };
+
+    var cleanReplace = function (i, regex, blockType, language) {
+        Array.prototype.slice.call(i.childNodes).forEach(function (child) {
+            if (regex.test(child.textContent)) {
+                i.replaceChild(
+                    replacement(
+                        child.textContent.match(regex),
+                        blockType,
+                        language
+                    ),
+                    child
+                );
+            }
+        });
+    };
+
+    var codeFormatter = function (selector) {
+        var contentArray = Array.prototype.slice.call(
+            document.querySelectorAll(selector)
+        );
+
+        // Multi-line code:
+        // var tripleTickRegex = new RegExp('([^(```)]*)(```{1}[\w\W]*?```)([\w\W]*)','gim');
+        var tripleTickRegex = /```[\w\W]+```/gim;
+        // Inline code:
+        // var singleTickRegex = new RegExp(/`[^`]+`/g);
+        var singleTickRegex = /`[^`]+`/g;
+        // var codeLanguageRegex = new RegExp(/```{1}.*/);
+        var codeLanguageRegex = /```{1}.*/;
+
+        contentArray.forEach(function (i) {
+            if (!/<pre/gi.test(i.innerHTML) && !/<code/gi.test(i.innerHTML)) {
+                // Match the code language, so we can support
+                // a lot of awesome syntax highlighting.
+                if (i.textContent && tripleTickRegex.test(i.textContent)) {
+                    // This needs a little extra filtering,
+                    // but cascading is cool.
+                    var codeLanguage = String(
+                        i.textContent.match(codeLanguageRegex)
+                    )
+                        .slice(3)
+                        .split(/(\s+)/)[0]
+                        .trim();
+
+                    cleanReplace(i, tripleTickRegex, 'pre', codeLanguage);
+                    var theNewKidsOnTheBlock = i.textContent
+                        .split(/(```)/)
+                        .map(function (textBlock, index, self) {
+                            if (/```/.test(textBlock)) {
+                                var backticks = document.createElement('span');
+                                backticks.style.opacity = 0.5;
+                                var textNode = document.createTextNode(
+                                    textBlock
+                                );
+                                backticks.appendChild(textNode);
+
+                                return backticks;
+                            } else if (
+                                self[index - 1] === '```' &&
+                                self[index + 1] === '```'
+                            ) {
+                                return replacement(
+                                    textBlock,
+                                    'pre',
+                                    textBlock.slice(0, 1) === 'p' ? 'plain' : ''
+                                );
+                            } else {
+                                var theOtherStuff = document.createElement(
+                                    'span'
+                                );
+
+                                var textNode = document.createTextNode(
+                                    textBlock
+                                );
+                                theOtherStuff.appendChild(textNode);
+
+                                return theOtherStuff;
+                            }
+                        });
+                    console.log(theNewKidsOnTheBlock);
+                }
+                if (singleTickRegex.test(i.textContent)) {
+                    // Single tick regex only works if it is
+                    // outside the triple tick match:
+                    cleanReplace(i, singleTickRegex, 'code');
+                }
+            }
+        });
+
+        // Invoke microlight:
+        microlight.reset();
+    };
+
+    // Attach globally:
+    window.codeFormatter = codeFormatter;
+})();
