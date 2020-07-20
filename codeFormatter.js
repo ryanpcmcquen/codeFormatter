@@ -313,14 +313,13 @@
                         .map(function (textBlock, index, self) {
                             if (/```/.test(textBlock)) {
                                 var backticks = document.createElement('span');
-                                var breakNode = document.createElement('br');
+
                                 backticks.style.opacity = 0.2;
                                 var textNode = document.createTextNode(
                                     textBlock
                                 );
 
                                 backticks.appendChild(textNode);
-                                backticks.appendChild(breakNode);
 
                                 pairs++;
                                 return backticks;
