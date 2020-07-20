@@ -1,4 +1,4 @@
-/*! codeFormatter v6.0.0 by ryanpcmcquen */
+/*! codeFormatter v6.0.2 by ryanpcmcquen */
 //
 // Ryan McQuen
 
@@ -307,6 +307,7 @@
                         .split(/(\s+)/)[0]
                         .trim();
 
+                    var pairs = 0;
                     var theNewKidsOnTheBlock = content.textContent
                         .split(/(```)/)
                         .map(function (textBlock, index, self) {
@@ -321,10 +322,12 @@
                                 backticks.appendChild(textNode);
                                 backticks.appendChild(breakNode);
 
+                                pairs++;
                                 return backticks;
                             } else if (
                                 self[index - 1] === '```' &&
-                                self[index + 1] === '```'
+                                self[index + 1] === '```' &&
+                                pairs % 2 === 1
                             ) {
                                 return replacement(
                                     textBlock,
@@ -334,6 +337,7 @@
                             } else if (
                                 singleTickRegex.test(content.textContent)
                             ) {
+                                var singlePairs = 0;
                                 // Single tick regex only works if it is
                                 // outside the triple tick match:
                                 var theSingleKids = textBlock
@@ -351,10 +355,12 @@
 
                                             backticks.appendChild(textNode);
 
+                                            singlePairs++;
                                             return backticks;
                                         } else if (
                                             self[index - 1] === '`' &&
-                                            self[index + 1] === '`'
+                                            self[index + 1] === '`' &&
+                                            singlePairs % 2 === 1
                                         ) {
                                             return replacement(
                                                 splitNode,
