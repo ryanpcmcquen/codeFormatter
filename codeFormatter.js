@@ -1,4 +1,4 @@
-/*! codeFormatter v6.0.2 by ryanpcmcquen */
+/*! codeFormatter v6.1.0 by ryanpcmcquen */
 //
 // Ryan McQuen
 
@@ -263,17 +263,22 @@
 (function () {
     'use strict';
 
-    var replacement = function (matchedText, blockType, language) {
-        var codeBlock = document.createElement(blockType);
+    var replacement = function (matchedText, blockType, opacity, language) {
+        opacity = opacity || 1;
+        language = language === undefined ? 'plain' : language;
+        var block = document.createElement(blockType);
         var textNode = document.createTextNode(String(matchedText));
 
         if (language !== 'plain' && language !== 'p') {
-            codeBlock.classList.add('microlight');
+            block.classList.add('microlight');
         }
-        codeBlock.appendChild(textNode);
+        block.appendChild(textNode);
+        block.style.opacity = opacity;
 
-        return codeBlock;
+        return block;
     };
+
+    var backtickOpacity = 0.3;
 
     var codeFormatter = function (selector) {
         var contentArray = Array.prototype.slice.call(
@@ -286,6 +291,8 @@
         var singleTickRegex = /`[^`]+`/g;
 
         var codeLanguageRegex = /```{1}.*/;
+        var tripleTickCapture = /(```)/;
+        var singleTickCapture = /(`[^`]+`)/;
 
         contentArray.forEach(function (content) {
             if (
@@ -294,120 +301,120 @@
             ) {
                 // Match the code language, so we can support
                 // a lot of awesome syntax highlighting.
-                if (
-                    content.textContent &&
-                    tripleTickRegex.test(content.textContent)
-                ) {
-                    // This needs a little extra filtering,
-                    // but cascading is cool.
-                    var codeLanguage = String(
-                        content.textContent.match(codeLanguageRegex)
-                    )
-                        .slice(3)
-                        .split(/(\s+)/)[0]
-                        .trim();
+                if (content.textContent) {
+                    var theNewKidsOnTheBlock = [];
+                    if (tripleTickRegex.test(content.textContent)) {
+                        // This needs a little extra filtering,
+                        // but cascading is cool.
+                        var codeLanguage = String(
+                            content.textContent.match(codeLanguageRegex)
+                        )
+                            .slice(3)
+                            .split(/(\s+)/)[0]
+                            .trim();
 
-                    var pairs = 0;
-                    var theNewKidsOnTheBlock = content.textContent
-                        .split(/(```)/)
-                        .map(function (textBlock, index, self) {
-                            if (/```/.test(textBlock)) {
-                                var backticks = document.createElement('span');
+                        var pairs = 0;
+                        content.textContent
+                            .split(tripleTickCapture)
+                            .forEach(function (textBlock, index, self) {
+                                if (tripleTickCapture.test(textBlock)) {
+                                    pairs++;
 
-                                backticks.style.opacity = 0.2;
-                                var textNode = document.createTextNode(
-                                    textBlock
-                                );
+                                    theNewKidsOnTheBlock.push(
+                                        replacement(
+                                            textBlock,
+                                            'pre',
+                                            backtickOpacity
+                                        )
+                                    );
+                                } else if (
+                                    self[index - 1] === '```' &&
+                                    self[index + 1] === '```' &&
+                                    pairs % 2 === 1
+                                ) {
+                                    theNewKidsOnTheBlock.push(
+                                        replacement(
+                                            textBlock,
+                                            'pre',
+                                            1,
+                                            textBlock.slice(0, 1) === 'p'
+                                                ? 'plain'
+                                                : ''
+                                        )
+                                    );
+                                } else {
+                                    theNewKidsOnTheBlock.push(
+                                        replacement(textBlock, 'span')
+                                    );
+                                }
+                            });
+                    }
+                }
+                if (singleTickRegex.test(content.textContent)) {
+                    var singlePairs = 0;
+                    var singlePlayerGame = function (splitBlock, index, self) {
+                        if (singleTickCapture.test(splitBlock)) {
+                            singlePairs++;
+                            return replacement(
+                                splitBlock,
+                                'code',
+                                backtickOpacity
+                            );
+                        } else if (
+                            self[index - 1] === '`' &&
+                            self[index + 1] === '`' &&
+                            singlePairs % 2 === 1
+                        ) {
+                            return replacement(splitBlock, 'code');
+                        } else {
+                            return replacement(splitBlock, 'span');
+                        }
+                    };
 
-                                backticks.appendChild(textNode);
-
-                                pairs++;
-                                return backticks;
-                            } else if (
-                                self[index - 1] === '```' &&
-                                self[index + 1] === '```' &&
-                                pairs % 2 === 1
-                            ) {
-                                return replacement(
-                                    textBlock,
-                                    'pre',
-                                    textBlock.slice(0, 1) === 'p' ? 'plain' : ''
-                                );
-                            } else if (
-                                singleTickRegex.test(content.textContent)
-                            ) {
-                                var singlePairs = 0;
-                                // Single tick regex only works if it is
-                                // outside the triple tick match:
-                                var theSingleKids = textBlock
-                                    .split(/(`)/)
-                                    .map(function (splitNode, index, self) {
-                                        if (/`/.test(splitNode)) {
-                                            var backticks = document.createElement(
-                                                'span'
-                                            );
-
-                                            backticks.style.opacity = 0.2;
-                                            var textNode = document.createTextNode(
-                                                splitNode
-                                            );
-
-                                            backticks.appendChild(textNode);
-
-                                            singlePairs++;
-                                            return backticks;
-                                        } else if (
-                                            self[index - 1] === '`' &&
-                                            self[index + 1] === '`' &&
-                                            singlePairs % 2 === 1
-                                        ) {
-                                            return replacement(
-                                                splitNode,
-                                                'code'
+                    if (theNewKidsOnTheBlock.length > 0) {
+                        theNewKidsOnTheBlock.forEach(function (
+                            block,
+                            index,
+                            self
+                        ) {
+                            if (singleTickCapture.test(block.textContent)) {
+                                var newSet = [];
+                                block.textContent
+                                    .split(singleTickCapture)
+                                    .forEach(function (child) {
+                                        if (singleTickRegex.test(child)) {
+                                            newSet.push(
+                                                replacement(child, 'code')
                                             );
                                         } else {
-                                            var theOtherStuff = document.createElement(
-                                                'span'
+                                            newSet.push(
+                                                replacement(child, 'span')
                                             );
-
-                                            var textNode = document.createTextNode(
-                                                splitNode
-                                            );
-                                            theOtherStuff.appendChild(textNode);
-
-                                            return theOtherStuff;
                                         }
                                     });
-
-                                var inlineSpan = document.createElement('span');
-                                theSingleKids.forEach(function (singleKid) {
-                                    inlineSpan.appendChild(singleKid);
-                                });
-                                return inlineSpan;
-                            } else {
-                                var theOtherStuff = document.createElement(
-                                    'span'
-                                );
-
-                                var textNode = document.createTextNode(
-                                    textBlock
-                                );
-
-                                theOtherStuff.appendChild(textNode);
-
-                                return theOtherStuff;
+                                self[index] = newSet;
                             }
                         });
-                    while (content.firstChild) {
-                        content.removeChild(content.firstChild);
+
+                        theNewKidsOnTheBlock = theNewKidsOnTheBlock.flat();
+                    } else {
+                        var theSingleKids = [];
+                        theSingleKids = content.textContent
+                            .split(singleTickCapture)
+                            .map(singlePlayerGame);
+                        var inlineSpan = document.createElement('span');
+                        theSingleKids.forEach(function (singleKid) {
+                            inlineSpan.appendChild(singleKid);
+                        });
+                        theNewKidsOnTheBlock.push(inlineSpan);
                     }
-                    theNewKidsOnTheBlock.forEach(function (newKid) {
-                        if (/```/.test(newKid.textContent)) {
-                            content.appendChild(document.createElement('br'));
-                        }
-                        content.appendChild(newKid);
-                    });
                 }
+                while (content.firstChild) {
+                    content.removeChild(content.firstChild);
+                }
+                theNewKidsOnTheBlock.forEach(function (newKid) {
+                    content.appendChild(newKid);
+                });
             }
         });
 
