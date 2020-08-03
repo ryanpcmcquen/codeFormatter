@@ -1,4 +1,4 @@
-/*! codeFormatter v6.1.0 by ryanpcmcquen */
+/*! codeFormatter v6.1.1 by ryanpcmcquen */
 //
 // Ryan McQuen
 
@@ -297,59 +297,57 @@
         contentArray.forEach(function (content) {
             if (
                 !/<pre/gi.test(content.innerHTML) &&
-                !/<code/gi.test(content.innerHTML)
+                !/<code/gi.test(content.innerHTML) &&
+                content.textContent
             ) {
-                // Match the code language, so we can support
-                // a lot of awesome syntax highlighting.
-                if (content.textContent) {
-                    var theNewKidsOnTheBlock = [];
-                    if (tripleTickRegex.test(content.textContent)) {
-                        // This needs a little extra filtering,
-                        // but cascading is cool.
-                        var codeLanguage = String(
-                            content.textContent.match(codeLanguageRegex)
-                        )
-                            .slice(3)
-                            .split(/(\s+)/)[0]
-                            .trim();
+                var theNewKidsOnTheBlock = [];
+                if (tripleTickRegex.test(content.textContent)) {
+                    // This needs a little extra filtering,
+                    // but cascading is cool.
+                    var codeLanguage = String(
+                        content.textContent.match(codeLanguageRegex)
+                    )
+                        .slice(3)
+                        .split(/(\s+)/)[0]
+                        .trim();
 
-                        var pairs = 0;
-                        content.textContent
-                            .split(tripleTickCapture)
-                            .forEach(function (textBlock, index, self) {
-                                if (tripleTickCapture.test(textBlock)) {
-                                    pairs++;
+                    var pairs = 0;
+                    content.textContent
+                        .split(tripleTickCapture)
+                        .forEach(function (textBlock, index, self) {
+                            if (tripleTickCapture.test(textBlock)) {
+                                pairs++;
 
-                                    theNewKidsOnTheBlock.push(
-                                        replacement(
-                                            textBlock,
-                                            'pre',
-                                            backtickOpacity
-                                        )
-                                    );
-                                } else if (
-                                    self[index - 1] === '```' &&
-                                    self[index + 1] === '```' &&
-                                    pairs % 2 === 1
-                                ) {
-                                    theNewKidsOnTheBlock.push(
-                                        replacement(
-                                            textBlock,
-                                            'pre',
-                                            1,
-                                            textBlock.slice(0, 1) === 'p'
-                                                ? 'plain'
-                                                : ''
-                                        )
-                                    );
-                                } else {
-                                    theNewKidsOnTheBlock.push(
-                                        replacement(textBlock, 'span')
-                                    );
-                                }
-                            });
-                    }
+                                theNewKidsOnTheBlock.push(
+                                    replacement(
+                                        textBlock,
+                                        'pre',
+                                        backtickOpacity
+                                    )
+                                );
+                            } else if (
+                                self[index - 1] === '```' &&
+                                self[index + 1] === '```' &&
+                                pairs % 2 === 1
+                            ) {
+                                theNewKidsOnTheBlock.push(
+                                    replacement(
+                                        textBlock,
+                                        'pre',
+                                        1,
+                                        textBlock.slice(0, 1) === 'p'
+                                            ? 'plain'
+                                            : ''
+                                    )
+                                );
+                            } else {
+                                theNewKidsOnTheBlock.push(
+                                    replacement(textBlock, 'span')
+                                );
+                            }
+                        });
                 }
+
                 if (singleTickRegex.test(content.textContent)) {
                     var singlePairs = 0;
                     var singlePlayerGame = function (splitBlock, index, self) {
@@ -409,12 +407,14 @@
                         theNewKidsOnTheBlock.push(inlineSpan);
                     }
                 }
-                while (content.firstChild) {
-                    content.removeChild(content.firstChild);
+                if (theNewKidsOnTheBlock.length > 0) {
+                    while (content.firstChild) {
+                        content.removeChild(content.firstChild);
+                    }
+                    theNewKidsOnTheBlock.forEach(function (newKid) {
+                        content.appendChild(newKid);
+                    });
                 }
-                theNewKidsOnTheBlock.forEach(function (newKid) {
-                    content.appendChild(newKid);
-                });
             }
         });
 
