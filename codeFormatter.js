@@ -1,4 +1,4 @@
-/*! codeFormatter v6.1.1 by ryanpcmcquen */
+/*! codeFormatter v6.1.2 by ryanpcmcquen */
 //
 // Ryan McQuen
 
